@@ -1,15 +1,16 @@
 import numpy as np
 import glob
 import codecs
-
 import sklearn
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn import cross_validation, grid_search
+from sklearn import cross_validation
+from sklearn import grid_search
 from sklearn import preprocessing
 
 
-np.random.seed(41)  # Seed the pseudo-random generator so the results are reproducible
+np.random.seed(42)  # Seed the pseudo-random generator so the results are reproducible
 
 
 # -------------------------------------------------
@@ -34,9 +35,9 @@ def simple_features_extended(text):
     """Extract some more simple numeric features from one email."""
     count_free = text.count("free")
     count_credit = text.count("money")
-    count_nigeria = text.count("penis")
-    count_nigeria = text.count("pill")
-    return [count_free, count_credit, count_nigeria] + simple_features(text)
+    count_penis = text.count("penis")
+    count_pill = text.count("pill")
+    return [count_free, count_credit, count_penis, count_pill] + simple_features(text)
 
 
 def get_dataset(feature_extraction_function, number_of_emails=5):
@@ -48,13 +49,15 @@ def get_dataset(feature_extraction_function, number_of_emails=5):
     ham_pattern  = "data/enron*/ham/*.txt"
     spam_pattern = "data/enron*/spam/*.txt"
 
-    # Go through all data and put together our dataset
-
+    # Initialise
     features = []
     labels   = []
 
-    ham_files = glob.glob(ham_pattern)[0:number_of_emails]
-    spam_files = glob.glob(spam_pattern)[0:number_of_emails]
+    # Find all files containing ham and spam emails and concatenate them with the corresponding label
+    ham_files = glob.glob(ham_pattern)
+    ham_files = ham_files[0:min(number_of_emails, len(ham_files))]
+    spam_files = glob.glob(spam_pattern)
+    spam_files = spam_files[0:min(number_of_emails, len(spam_files))]
     files = list(zip(ham_files, [0] * len(ham_files))) + list(zip(spam_files, [1] * len(spam_files)))
 
     for filename, label in files:
@@ -81,9 +84,10 @@ def get_dataset(feature_extraction_function, number_of_emails=5):
 
 NUM_EMAILS = 1000
 
+features, labels = get_dataset(simple_features, number_of_emails=NUM_EMAILS)
+
 # ---- First try: logistic regression ----
 print("\n---- FIRST MODEL: LOGISTIC REGRESSION ----")
-features, labels = get_dataset(simple_features, number_of_emails=NUM_EMAILS)
 model1 = LogisticRegression()
 model1.fit(features, labels)
 predicted_labels = model1.predict(features)
