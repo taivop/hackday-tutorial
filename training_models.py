@@ -64,7 +64,7 @@ def get_dataset(feature_extraction_function, number_of_emails=5):
         with codecs.open(filename, "r", encoding="utf-8", errors="ignore") as f:
             text = "".join(f.readlines())
             email_features = feature_extraction_function(text)
-            labels.append(label)              # Last entry in feature vec
+            labels.append(label)
 
             features.append(email_features)
 
